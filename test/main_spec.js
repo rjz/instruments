@@ -12,19 +12,46 @@ function fooSync () {
 }
 
 describe('.counter', function () {
-  var countedFoo = instruments.counter('fooC', fooSync);
+
+  var countedFooSync = instruments.counter('fooC', fooSync);
+
   it('increments as function is called', function () {
-    countedFoo();
-    assert.equal(rprtr.filterByName('fooC')[0].count, 1)
+    countedFooSync();
+    assert.equal(rprtr.filterByName('fooC')[0].count, 1);
+  });
+});
+
+describe('.timed', function () {
+
+  var val;
+
+  var timedFoo = instruments.timed('fooT', function (lastVal, cb) {
+    val = lastVal;
+    setTimeout(cb, 1);
+  });
+
+  it('reports', function (done) {
+    timedFoo(1, function (err) {
+      assert.ok(0 < rprtr.filterByName('fooT')[0].dt);
+      done(err);
+    });
+  });
+
+  it('preserves arguments', function (done) {
+    timedFoo(2, function (err) {
+      done(err);
+    });
+    assert.equal(2, val);
   });
 });
 
 describe('.timedSync', function () {
-  var timedFoo = instruments.counter('fooTS', fooSync);
+
+  var timedFooSync = instruments.timedSync('fooTS', fooSync);
+
   it('reports', function () {
-    instruments.timedSync('fooTS', timedFoo)();
-    assert.equal(rprtr.filterByName('fooTS')[0].count, 1)
+    timedFooSync();
+    assert.ok(undefined !== rprtr.filterByName('fooTS')[0].dt);
   });
 });
-
 

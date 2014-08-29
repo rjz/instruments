@@ -47,11 +47,13 @@ module.exports = function instrument (opts) {
           callback = args.pop(),
           t0 = Date.now();
 
-      fn(function () {
+      var wrappedCallback = function () {
         var dt = Date.now() - t0;
         options.report({ name: name, dt: dt });
-        callback.apply(this, args.slice(1));
-      });
+        callback.apply(this, arguments);
+      };
+
+      fn.apply(this, args.concat(wrappedCallback));
     };
   };
 
